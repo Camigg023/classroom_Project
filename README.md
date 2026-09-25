@@ -17,10 +17,10 @@ Base de datos:
 
 -- ARQUITECTURA --
 
-Para el proyecto se utiliza Arquitectura Hexagonal, esta separada de la siguente manera:
+** Para el proyecto se utiliza Arquitectura Hexagonal, esta separada de la siguente manera:
 
-Domain: reglas y entidades
-Application: casos de uso y logica de la app
-Infrastructure: conexion con MongoDB, Apis y servicios externos
-Ports: interfaces que conectan la app con el exterior
-Adapters: conecta componentes externos con los puertos definidos por la app
+* Domain: reglas y entidades
+* Application: casos de uso y logica de la app
+* Infrastructure: conexion con MongoDB, Apis y servicios externos
+* Ports: interfaces que conectan la app con el exterior
+* Adapters: conecta componentes externos con los puertos definidos por la app
