@@ -24,3 +24,11 @@ Base de datos:
 * Infrastructure: conexion con MongoDB, Apis y servicios externos
 * Ports: interfaces que conectan la app con el exterior
 * Adapters: conecta componentes externos con los puertos definidos por la app
+
+-- REQUISITOS --
+
+* Tener instalado Node.js version 18 o superior: node --version
+* npm: npm --version
+* MongoDB Community Server: mongod --version
+
+** Crea el archivo .env en backend/ a partir de .env.example y completa las variables locales **
