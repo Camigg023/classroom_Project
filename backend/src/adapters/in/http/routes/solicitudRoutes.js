@@ -37,5 +37,34 @@ export const createSolicitudRouter = (solicitudController) => {
     solicitudController.prioritize
   );
 
+  router.patch(
+    '/:id/asignar',
+    requireRoles(ROLES.COORDINADOR),
+    solicitudController.asignar
+  );
+
+  router.post(
+    '/:id/comentarios',
+    solicitudController.addComentario
+  );
+
+  router.patch(
+    '/:id/estado',
+    requireRoles(ROLES.AGENTE, ROLES.COORDINADOR),
+    solicitudController.cambiarEstado
+  );
+
+  router.post(
+    '/:id/confirmar-cierre',
+    requireRoles(ROLES.SOLICITANTE),
+    solicitudController.confirmarCierre
+  );
+
+  router.post(
+    '/:id/reabrir',
+    requireRoles(ROLES.SOLICITANTE),
+    solicitudController.reabrir
+  );
+
   return router;
 };

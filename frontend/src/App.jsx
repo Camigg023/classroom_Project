@@ -8,6 +8,7 @@ import { LoginPage } from './pages/LoginPage';
 import { MisSolicitudesPage } from './pages/MisSolicitudesPage';
 import { NuevaSolicitudPage } from './pages/NuevaSolicitudPage';
 import { CoordinadorDashboardPage } from './pages/CoordinadorDashboardPage';
+import { AgenteDashboardPage } from './pages/AgenteDashboardPage';
 import { DetalleSolicitudPage } from './pages/DetalleSolicitudPage';
 
 const RootRedirect = () => {
@@ -27,7 +28,7 @@ const RootRedirect = () => {
     return <Navigate to="/mis-solicitudes" replace />;
   }
   if (user.rol === 'Agente') {
-    return <Navigate to="/coordinador/solicitudes" replace />;
+    return <Navigate to="/agente/solicitudes" replace />;
   }
   return <Navigate to="/coordinador/solicitudes" replace />;
 };
@@ -51,8 +52,13 @@ export function App() {
               </Route>
 
               {/* Rol Coordinador y Auditor */}
-              <Route element={<ProtectedRoute allowedRoles={['Coordinador', 'Auditor', 'Agente']} />}>
+              <Route element={<ProtectedRoute allowedRoles={['Coordinador', 'Auditor']} />}>
                 <Route path="/coordinador/solicitudes" element={<CoordinadorDashboardPage />} />
+              </Route>
+
+              {/* Rol Agente */}
+              <Route element={<ProtectedRoute allowedRoles={['Agente']} />}>
+                <Route path="/agente/solicitudes" element={<AgenteDashboardPage />} />
               </Route>
 
               {/* Detalle compartido (con autorización de backend) */}

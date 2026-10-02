@@ -27,6 +27,13 @@ export const CoordinadorDashboardPage = () => {
   const [modalLoading, setModalLoading] = useState(false);
   const [modalError, setModalError] = useState(null);
 
+  // Modal de asignación (HU05)
+  const [assignTicket, setAssignTicket] = useState(null);
+  const [agentesList, setAgentesList] = useState([]);
+  const [selectedAgenteId, setSelectedAgenteId] = useState('');
+  const [assignLoading, setAssignLoading] = useState(false);
+  const [assignError, setAssignError] = useState(null);
+
   const fetchSolicitudes = async () => {
     setLoading(true);
     setError(null);
@@ -81,6 +88,36 @@ export const CoordinadorDashboardPage = () => {
       setModalError(err.message || 'Error al actualizar la prioridad');
     } finally {
       setModalLoading(false);
+    }
+  };
+
+  const openAssignModal = async (ticket) => {
+    setAssignTicket(ticket);
+    setAssignError(null);
+    try {
+      const data = await apiClient.getAgentesActivos();
+      setAgentesList(data);
+      if (data.length > 0) {
+        setSelectedAgenteId(ticket.agenteAsignadoId || data[0].id);
+      }
+    } catch (err) {
+      setAssignError(err.message || 'Error al obtener la lista de agentes');
+    }
+  };
+
+  const handleSaveAssign = async (e) => {
+    e.preventDefault();
+    if (!selectedAgenteId || !assignTicket) return;
+    setAssignLoading(true);
+    setAssignError(null);
+    try {
+      await apiClient.asignarSolicitud(assignTicket.id, selectedAgenteId);
+      setAssignTicket(null);
+      await fetchSolicitudes();
+    } catch (err) {
+      setAssignError(err.message || 'Error al asignar agente');
+    } finally {
+      setAssignLoading(false);
     }
   };
 
@@ -196,6 +233,7 @@ export const CoordinadorDashboardPage = () => {
                     <th>Categoría</th>
                     <th>Prioridad</th>
                     <th>Estado</th>
+                    <th>Agente Asignado</th>
                     <th>Fecha Registro</th>
                     <th>Acciones</th>
                   </tr>
@@ -211,6 +249,13 @@ export const CoordinadorDashboardPage = () => {
                       </td>
                       <td><PriorityBadge prioridad={sol.prioridad} /></td>
                       <td><StatusBadge estado={sol.estado} /></td>
+                      <td style={{ fontSize: '0.84rem' }}>
+                        {sol.agenteAsignadoNombre ? (
+                          <span style={{ color: '#1e293b', fontWeight: 500 }}>{sol.agenteAsignadoNombre}</span>
+                        ) : (
+                          <span style={{ color: '#94a3b8', fontStyle: 'italic' }}>Sin asignar</span>
+                        )}
+                      </td>
                       <td style={{ fontSize: '0.8rem', color: '#64748b' }}>{formatDate(sol.createdAt)}</td>
                       <td>
                         <div style={{ display: 'flex', gap: '6px' }}>
@@ -218,13 +263,23 @@ export const CoordinadorDashboardPage = () => {
                             Detalle
                           </Link>
                           {user.rol === 'Coordinador' && (
-                            <button
-                              type="button"
-                              className="btn btn-primary btn-sm"
-                              onClick={() => openPrioritizeModal(sol)}
-                            >
-                              Priorizar
-                            </button>
+                            <>
+                              <button
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={() => openPrioritizeModal(sol)}
+                              >
+                                Priorizar
+                              </button>
+                              <button
+                                type="button"
+                                className="btn btn-secondary btn-sm"
+                                style={{ backgroundColor: '#eff6ff', color: '#1d4ed8', borderColor: '#bfdbfe' }}
+                                onClick={() => openAssignModal(sol)}
+                              >
+                                {sol.agenteAsignadoId ? 'Reasignar' : 'Asignar'}
+                              </button>
+                            </>
                           )}
                         </div>
                       </td>
@@ -325,6 +380,72 @@ export const CoordinadorDashboardPage = () => {
                     disabled={modalLoading}
                   >
                     {modalLoading ? 'Guardando...' : 'Guardar Prioridad'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Asignación de Agente (HU05) */}
+        {assignTicket && (
+          <div className="modal-overlay">
+            <div className="modal-dialog">
+              <div className="modal-header">
+                <h3 style={{ fontSize: '1.05rem', fontWeight: 600 }}>
+                  Asignar Solicitud: {assignTicket.codigo}
+                </h3>
+                <button
+                  type="button"
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem', color: '#64748b' }}
+                  onClick={() => setAssignTicket(null)}
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveAssign}>
+                <div className="modal-body">
+                  {assignError && <div className="alert alert-danger">{assignError}</div>}
+                  
+                  <p style={{ fontSize: '0.88rem', color: '#475569', marginBottom: '14px' }}>
+                    <strong>Asunto:</strong> {assignTicket.titulo}
+                  </p>
+
+                  <div className="form-group">
+                    <label className="form-label" htmlFor="agenteModalSelect">
+                      Agente Técnico Asignado <span style={{ color: '#dc2626' }}>*</span>
+                    </label>
+                    <select
+                      id="agenteModalSelect"
+                      className="form-control"
+                      value={selectedAgenteId}
+                      onChange={(e) => setSelectedAgenteId(e.target.value)}
+                      required
+                    >
+                      {agentesList.map((ag) => (
+                        <option key={ag.id} value={ag.id}>
+                          {ag.nombre} ({ag.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setAssignTicket(null)}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={assignLoading || !selectedAgenteId}
+                  >
+                    {assignLoading ? 'Asignando...' : 'Confirmar Asignación'}
                   </button>
                 </div>
               </form>

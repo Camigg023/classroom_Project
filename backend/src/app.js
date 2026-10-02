@@ -13,6 +13,7 @@ import { errorHandler } from './adapters/in/http/middlewares/errorHandler.js';
 import { MongoUserRepository } from './adapters/out/persistence/mongoose/repositories/MongoUserRepository.js';
 import { MongoSolicitudRepository } from './adapters/out/persistence/mongoose/repositories/MongoSolicitudRepository.js';
 import { MongoAuditRepository } from './adapters/out/persistence/mongoose/repositories/MongoAuditRepository.js';
+import { MongoNotificacionRepository } from './adapters/out/persistence/mongoose/repositories/MongoNotificacionRepository.js';
 
 // Casos de Uso (Aplicación)
 import { LoginUseCase } from './application/usecases/auth/LoginUseCase.js';
@@ -21,12 +22,23 @@ import { GetMisSolicitudesUseCase } from './application/usecases/solicitudes/Get
 import { GetSolicitudByIdUseCase } from './application/usecases/solicitudes/GetSolicitudByIdUseCase.js';
 import { GetSolicitudesForCoordinadorUseCase } from './application/usecases/solicitudes/GetSolicitudesForCoordinadorUseCase.js';
 import { PrioritizeSolicitudUseCase } from './application/usecases/solicitudes/PrioritizeSolicitudUseCase.js';
+import { AsignarSolicitudUseCase } from './application/usecases/solicitudes/AsignarSolicitudUseCase.js';
+import { AddComentarioUseCase } from './application/usecases/solicitudes/AddComentarioUseCase.js';
+import { CambiarEstadoUseCase } from './application/usecases/solicitudes/CambiarEstadoUseCase.js';
+import { ConfirmarCierreUseCase } from './application/usecases/solicitudes/ConfirmarCierreUseCase.js';
+import { ReabrirSolicitudUseCase } from './application/usecases/solicitudes/ReabrirSolicitudUseCase.js';
+import { GetAgentesActivosUseCase } from './application/usecases/users/GetAgentesActivosUseCase.js';
+import { GetNotificacionesUseCase, MarcarNotificacionLeidaUseCase } from './application/usecases/notificaciones/NotificacionesUseCases.js';
 
 // Controladores y Rutas (Adaptadores de entrada)
 import { AuthController } from './adapters/in/http/controllers/AuthController.js';
 import { SolicitudController } from './adapters/in/http/controllers/SolicitudController.js';
+import { UserController } from './adapters/in/http/controllers/UserController.js';
+import { NotificacionController } from './adapters/in/http/controllers/NotificacionController.js';
 import { createAuthRouter } from './adapters/in/http/routes/authRoutes.js';
 import { createSolicitudRouter } from './adapters/in/http/routes/solicitudRoutes.js';
+import { createUserRouter } from './adapters/in/http/routes/userRoutes.js';
+import { createNotificacionRouter } from './adapters/in/http/routes/notificacionRoutes.js';
 
 export const createApp = () => {
   const app = express();
@@ -41,6 +53,7 @@ export const createApp = () => {
   const userRepository = new MongoUserRepository();
   const solicitudRepository = new MongoSolicitudRepository();
   const auditRepository = new MongoAuditRepository();
+  const notificacionRepository = new MongoNotificacionRepository();
 
   const loginUseCase = new LoginUseCase(userRepository);
   const createSolicitudUseCase = new CreateSolicitudUseCase(solicitudRepository, auditRepository);
@@ -48,14 +61,32 @@ export const createApp = () => {
   const getSolicitudByIdUseCase = new GetSolicitudByIdUseCase(solicitudRepository, auditRepository);
   const getSolicitudesForCoordinadorUseCase = new GetSolicitudesForCoordinadorUseCase(solicitudRepository);
   const prioritizeSolicitudUseCase = new PrioritizeSolicitudUseCase(solicitudRepository, auditRepository);
+  const asignarSolicitudUseCase = new AsignarSolicitudUseCase(solicitudRepository, userRepository, auditRepository, notificacionRepository);
+  const addComentarioUseCase = new AddComentarioUseCase(solicitudRepository, auditRepository);
+  const cambiarEstadoUseCase = new CambiarEstadoUseCase(solicitudRepository, auditRepository);
+  const confirmarCierreUseCase = new ConfirmarCierreUseCase(solicitudRepository, auditRepository);
+  const reabrirSolicitudUseCase = new ReabrirSolicitudUseCase(solicitudRepository, auditRepository);
+  const getAgentesActivosUseCase = new GetAgentesActivosUseCase(userRepository);
+  const getNotificacionesUseCase = new GetNotificacionesUseCase(notificacionRepository);
+  const marcarNotificacionLeidaUseCase = new MarcarNotificacionLeidaUseCase(notificacionRepository);
 
   const authController = new AuthController(loginUseCase);
+  const userController = new UserController({ getAgentesActivosUseCase });
+  const notificacionController = new NotificacionController({
+    getNotificacionesUseCase,
+    marcarNotificacionLeidaUseCase
+  });
   const solicitudController = new SolicitudController({
     createSolicitudUseCase,
     getMisSolicitudesUseCase,
     getSolicitudByIdUseCase,
     getSolicitudesForCoordinadorUseCase,
-    prioritizeSolicitudUseCase
+    prioritizeSolicitudUseCase,
+    asignarSolicitudUseCase,
+    addComentarioUseCase,
+    cambiarEstadoUseCase,
+    confirmarCierreUseCase,
+    reabrirSolicitudUseCase
   });
 
   // Rutas
@@ -64,6 +95,8 @@ export const createApp = () => {
   });
 
   app.use('/api/auth', createAuthRouter(authController));
+  app.use('/api/users', createUserRouter(userController));
+  app.use('/api/notificaciones', createNotificacionRouter(notificacionController));
   app.use('/api/solicitudes', createSolicitudRouter(solicitudController));
 
   // Servir frontend compilado en producción

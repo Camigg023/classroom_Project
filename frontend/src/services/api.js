@@ -91,5 +91,54 @@ export const apiClient = {
       method: 'PATCH',
       body: JSON.stringify(payload)
     });
+  },
+
+  asignarSolicitud(id, agenteId) {
+    return this.request(`/solicitudes/${id}/asignar`, {
+      method: 'PATCH',
+      body: JSON.stringify({ agenteId })
+    });
+  },
+
+  addComentario(id, contenido) {
+    return this.request(`/solicitudes/${id}/comentarios`, {
+      method: 'POST',
+      body: JSON.stringify({ contenido })
+    });
+  },
+
+  cambiarEstado(id, payload) {
+    return this.request(`/solicitudes/${id}/estado`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload)
+    });
+  },
+
+  confirmarCierre(id) {
+    return this.request(`/solicitudes/${id}/confirmar-cierre`, {
+      method: 'POST'
+    });
+  },
+
+  reabrirSolicitud(id, motivo) {
+    return this.request(`/solicitudes/${id}/reabrir`, {
+      method: 'POST',
+      body: JSON.stringify({ motivo })
+    });
+  },
+
+  getAgentesActivos() {
+    return this.request('/users/agentes');
+  },
+
+  getNotificaciones(soloNoLeidas = false) {
+    const query = soloNoLeidas ? '?noLeidas=true' : '';
+    return this.request(`/notificaciones${query}`);
+  },
+
+  marcarNotificacionLeida(id) {
+    return this.request(`/notificaciones/${id}/leida`, {
+      method: 'PATCH'
+    });
   }
 };

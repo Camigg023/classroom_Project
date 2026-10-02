@@ -421,3 +421,72 @@ button, input, select, textarea {
   flex: 1;
   min-width: 180px;
 }
+
+/* Comentarios y Trazabilidad */
+.alert-warning {
+  background-color: var(--warning-bg);
+  color: var(--warning-text);
+  border: 1px solid #fde68a;
+}
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.comment-item {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  background-color: #ffffff;
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.comment-author {
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.comment-date {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.comment-body {
+  font-size: 0.88rem;
+  color: #334155;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.action-banner {
+  padding: 18px 20px;
+  border-radius: var(--radius-md);
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.action-banner-success {
+  background-color: #ecfdf5;
+  border: 1px solid #a7f3d0;
+}
+
+.action-banner-warning {
+  background-color: #fffbeb;
+  border: 1px solid #fde68a;
+}
+
