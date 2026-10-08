@@ -3,13 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
   "scripts": {
-    "build": "npm --prefix frontend install && npm --prefix frontend run build",
-    "build:frontend": "npm --prefix frontend install && npm --prefix frontend run build",
+    "build": "cd frontend && npm install && npx vite build",
+    "build:frontend": "cd frontend && npm install && npx vite build",
     "install:all": "npm --prefix frontend install && npm --prefix backend install",
     "start": "node backend/server.js",
     "dev": "npm --prefix frontend run dev",
